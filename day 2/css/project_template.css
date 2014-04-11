@@ -1,0 +1,36 @@
+.my_h1 {
+	text-align: center;
+	margin-bottom: 50px;
+}
+.my_row {
+	border: 2px solid blue;
+	margin: 20px 0;
+}
+.my_row div {
+	border-right: 2px solid red;
+	font-size: 2em;
+}
+.my_nav_container {
+    display: flex;	
+    display: -webkit-flex;
+    align-items: center;
+}
+.my_nav_div {
+    display: flex;	
+    display: -webkit-flex;
+    align-items: center;
+}
+.my_nav_ul {
+	margin-top: auto;
+	margin-bottom: auto;
+    display: -webkit-flex;
+    display: flex;	
+    justify-content: space-around;
+    align-items: center;
+	-webkit-box-flex:2.0; /* Safari and Chrome */
+}
+.my_nav_ul li {
+	justify-content: center;
+}
+.row_1 {
+}

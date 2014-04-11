@@ -1,0 +1,29 @@
+/* javascript_test.css */
+.my_main h1 {
+	text-align: center;
+}
+.my_main div {
+	font-family: Consolas, monospace;
+	font-size: 2em;
+	margin: 20px;
+	padding: 10px;
+	border: 2px solid blue;
+}
+.my_main ol {
+	padding-left: 20px;
+}
+.math_content ol {
+	color: purple;
+}
+.my_form *, .my_function_form * {
+  display: block;
+  margin-left: 40px;
+  margin-top: 10px;
+}
+.my_form button {
+	width: 100px;
+}
+.message_div {
+	font-family: Georgia;
+	font-size: 1em;
+}

@@ -1,0 +1,39 @@
+.my_main {
+	font-family: Georgia;
+	font-size: 16px;
+}
+.my_main h1 {
+	text-align: center;
+	font-size: 2em;
+}
+.content td div, .content td {
+	border: 1px solid blue;
+	width: 130px;
+	height: 130px;
+}
+.content {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	padding: 100px;
+}
+.content button {
+  margin: 20px;
+  padding: 10px;
+}
+.num_guesses_div {
+	margin: 20px;
+	padding: 20px;
+	border: 2px solid red;
+	height: 200px;
+	width: 200px;
+}
+.num_guesses {
+	font-size: 3em;
+}
+.content td .picked {
+	border: 2px solid red;
+}
+.content td .correct {
+	border: 2px solid green;
+}

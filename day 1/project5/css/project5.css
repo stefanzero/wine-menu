@@ -1,0 +1,62 @@
+body {
+	font-family: Impact;
+	font-size: 16px;
+}
+.my_h1 {
+	font-size: 3em;
+	text-align: center;
+}
+.div_common {
+	border: 2px solid black;
+	overflow: hidden;
+}
+.div_outer {
+	margin-left:auto;
+	margin-right:auto;
+	width: 800px;
+	height: 800px;
+	position: relative;
+}
+.div_inner {
+	width: 200px;
+	height: 200px;
+	position: absolute;
+}
+.div_NW {
+	left: 0px;
+	top: 0px;
+	background-image: url("../images/Family_Guy_Icons.jpg");
+	background-position: -380px 10px;
+	background-size: 800%;
+}
+.div_NE {
+	right: 0px;
+	top: 0px;
+	background-image: url("../images/Family_Guy_Icons.jpg");
+	background-position: -1080px -660px;
+	background-size: 800%;
+}
+.div_SE {
+	right: 0px;
+	bottom: 0px;
+	background-image: url("../images/Family_Guy_Icons.jpg");
+	background-position: -380px -660px;
+	background-size: 800%;
+}
+.div_SW {
+	left: 0px;
+	bottom: 0px;
+	background-image: url("../images/Family_Guy_Icons.jpg");
+	background-position: -60px -380px;
+	background-size: 900%;
+}
+.div_center {
+	position: relative;
+	margin: auto;
+	margin-top: 300px;
+	/*background-image: url("../images/The_Family_Guy_Icons.png");*/
+	background-image: url("../images/Family_Guy_Icons.jpg");
+	background-position: -50px 10px;
+	background-size: 800%;
+	/*background-size: 200px 200px;*/
+}

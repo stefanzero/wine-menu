@@ -1,0 +1,171 @@
+@import "../../libraries/fonts/Cicle-fontfacekit/web fonts/cicle_gordita_macroman/stylesheet.css";
+.wine_menu_main {
+  position: relative;
+  font: 16px cicle_gorditagordita, Georgia;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  /*border: 5px solid purple;*/
+}
+.wine_menu_main header {
+  border: 1px solid black;
+  background: #efd4f7;
+  padding: 20px;
+  padding-left: 40px;
+  margin: 20px;
+  border-radius: 20px;
+}
+.wine_menu_main header figure {
+	display: inline-block;
+	float: right;
+}
+.wine_menu_main header img {
+	width: 128px;
+	height: 128px;
+}
+.wine_menu_main h1 {
+  display: inline-block;
+  font-size: 4em;
+  font-weight: bold;
+}
+.wine_menu_main .caption_div {
+  display: inline-block;
+}
+.wine_menu_main figurecaption {
+  font-size: 1.5em;
+}
+.wine_menu_main .cart_quantity {
+  display: block;
+  font-size: 1.5em;
+}
+.wine_menu_main	article {
+  border: 1px solid black;
+  background: #efd4f7;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 20px;
+  font-size: 1.5em;
+}
+.wine_menu_main .wine_object_div {
+	display: flex;
+	justify-content: space-around;
+}
+.wine_menu_main .input_div {
+  /* display: flex; */
+  /*justify-content: flex-end;*/
+}
+.wine_menu_main .input_div > * {
+	display: block;
+	width: 80%;
+}
+.wine_name {
+	font-size: 1.6em;
+}
+.wine_menu_main::after{
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /*height: 100%;*/
+      height: inherit;
+      background-image: url("../images/Yeast_on_grapes.jpg");
+      background-size: 10%;
+      opacity: 0.8;
+      z-index: -1;	
+}
+
+.wine_menu_main div.wine_info {
+  width: 45%;
+}
+.wine_menu_main .wine_figure {
+  width: 25%;
+}
+.wine_menu_main .wine_figure img {
+  width: 250px;
+}
+.wine_menu_main div.input_div {
+  width: 12%;
+}
+
+@media (max-width: 660px) {
+  .wine_menu_main .wine_object_div {
+    display: block;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .wine_menu_main div.wine_info {
+    width: 65%;
+    float: left;
+  }
+  .wine_menu_main .wine_figure {
+    display: block;
+    float: left;
+    width: 35%;
+    padding-left: 5%;
+  }
+  .wine_menu_main div.input_div {
+    display: block;
+    float: left;
+    width: 35%;
+    padding-left: 5%;
+    margin-top: 10px;
+  }
+}
+/*
+@media (max-width: 900px) { 
+  .wine_menu_main article {
+    font-size: 1.3em;
+  }
+  .wine_menu_main div.wine_info {
+  }
+  .wine_menu_main .wine_figure img {
+    width: 220px;
+    height: 265px;
+  }
+  .wine_menu_main div.input_div {
+    width: 15%;
+  }
+}
+
+@media (max-width: 700px) {
+  .wine_menu_main article {
+    font-size: 1.1em;
+  }
+  .wine_menu_main div.wine_info {
+    width: 30%;
+  }
+  .wine_menu_main .wine_figure img {
+    width: 200px;
+    height: 240px;
+  }
+  .wine_menu_main div.input_div {
+    width: 10%;
+  }
+}
+
+@media (max-width: 600px) {
+  .wine_menu_main article {
+    font-size: 1.1em;
+  }
+  .wine_menu_main div.wine_info {
+    width: 50%;
+  }
+  .wine_menu_main .wine_figure {
+    display: block;
+    float: left;
+  }
+  .wine_menu_main .wine_figure img {
+    width: 150px;
+    height: 180px;
+  }
+  .wine_menu_main div.input_div {
+    display: block;
+    float: left;
+    width: 150px;
+  }
+}
+*/

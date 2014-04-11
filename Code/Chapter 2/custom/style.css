@@ -1,0 +1,49 @@
+li li {
+	color: #FF0000;
+}
+td+td+td {
+	background-color: gray;
+}
+.shakespears_plays tr:nth-child(1),
+.shakespears_plays tr:nth-child(2)
+{
+	color: green;
+}
+.shakespears_plays tr:nth-child(3),
+.shakespears_plays tr:nth-child(4),
+.shakespears_plays tr:nth-child(5)
+{
+	color: red;
+}
+#container table:nth-child(4) {
+	border: 1px solid blue;
+}
+a {
+	text-decoration: none;
+	font-style: italic;
+	color: purple;
+}
+a:hover {
+	text-decoration: underline;
+}
+a[href$='pdf'] {
+	color: rgba(255, 255, 128, 1);
+	background-color: #AAA;
+	text-decoration: blink;
+}
+tr:nth-child(even) {
+	background-color: #CCC;
+}
+h2 {
+	border-top: 20px solid gold;
+}
+h2 > table, h2 > ul {
+	margin-left: 20px;
+}
+/*
+#container table:nth-child(4) tr:nth-child(1),
+#container table:nth-child(4) tr:nth-child(2)
+{
+	color: green;
+}
+*/
