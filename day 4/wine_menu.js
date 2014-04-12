@@ -110,9 +110,9 @@ var wine_constructor = function() {
 	}
   };
   get_heading = function() {
-	var my_heading = '<header class="row"><h1 class="col-sm-6">Wine Menu</h1>';
+	var my_heading = '<header class=""><h1 class="">Wine Menu</h1>';
 	/* http://www.iconarchive.com/show/real-vista-business-icons-by-iconshock/shopping-cart-icon.html */
-	my_heading += '<div class="cart_div col-sm-6"><figure alt="Shopping Cart"><img src="images/shopping-cart-icon.png">' +
+	my_heading += '<div class="cart_div"><figure alt="Shopping Cart"><img src="images/shopping-cart-icon.png">' +
 	  '<div class="caption_div"><figurecaption>Cart</figurecaption>' + 
 	  '<span class="cart_quantity"></span></div></div></header>';
 	var my_heading_html = $.parseHTML(my_heading);
