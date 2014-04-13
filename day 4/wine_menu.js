@@ -44,7 +44,8 @@ var wine_constructor = function() {
   	wine_quantity: {},
   	resize_timer_id: null,
   	cart_article_is_displayed: false,
-  	cart_article_table_is_collapsed: false,
+  	cart_article_table_is_collapsed: true,
+  	cart_article_initialized: false,
   };
   jquery_map = {};
   /*
@@ -53,7 +54,7 @@ var wine_constructor = function() {
   var init_jquery_map, append_jquery_map, set_jquery_map, 
     init_wine_data, add_wine_quantity, set_wine_quantity,
     update_quantity_display, get_total_quantity, 
-    get_data, get_heading, get_cart, get_input_div, 
+    get_data, get_heading, get_cart_table, get_cart, get_input_div, 
     add_cart_handlers, add_button_handler,
     formatter, resize_display, on_resize, init_module
   init_jquery_map = function(container) {
@@ -86,18 +87,29 @@ var wine_constructor = function() {
   	};
   };
   add_wine_quantity = function(id, quantity) {
+	if (quantity < 0) {
+		return;
+	}
   	if (id in wine.data.wine_quantity) {
   		state_map.wine_quantity[id] += quantity;
   	}
   };
   set_wine_quantity = function(id, quantity) {
+	if (quantity < 0) {
+		return;
+	}
   	if (id in state_map.wine_quantity) {
   		state_map.wine_quantity[id] = quantity;
+  	}
+  	if (id in state_map.wine_object) {
+  	  state_map.wine_object[id]['quantity'] = quantity;
   	}
   };
   update_quantity_display = function() {
   	var total_quantity = get_total_quantity();
   	jquery_map[config_map.cart_display_key].html(total_quantity);
+  	var cart_table_html = $.parseHTML(get_cart_table());
+  	jquery_map[config_map.cart_article_key].find('table').replaceWith(cart_table_html);
   };
   get_total_quantity = function() {
   	var total_quantity = 0;
@@ -132,13 +144,8 @@ var wine_constructor = function() {
 	var my_heading_html = $.parseHTML(my_heading);
 	return my_heading_html;
   };
-  get_cart = function() {
-	var cart_string = '<article class="cart_article">';
-	cart_string += '<header>';
-	cart_string += '<h2>Your Shopping Cart</h2>';
-	cart_string += '<div class="close_icon" title="hide cart"></div>';
-	cart_string += '</header>';
-	cart_string += '<div class="table_div">';
+  get_cart_table = function() {
+    var cart_string = "";
 	cart_string += '<table>';
 	cart_string += '<tr><th class="cart_name">Wine</th>' + 
 	  '<th class="cart_quantity">Number</th>' + 
@@ -147,19 +154,49 @@ var wine_constructor = function() {
 	var wine_index = "";
 	var wine_object = null;
 	var item_total = 0;
+	var cart_total = 0;
+	var quantity_total = 0;
 	var item_total_string = "";
 	var row_string = "";
 	for (wine_index in state_map.wine_object) {
 	  wine_object = state_map.wine_object[wine_index];
-	  item_total = wine_object['price'] * wine_object['quantity'];
-	  item_total_string = "$" + item_total;
-	  row_string = '<tr><td class="cart_name">' + wine_object['name'] + '</td>' +
-	    '<td class="cart_quantity">' + wine_object['quantity'] + '</td>' + 
-	    '<td class="cart_price">$' + wine_object['price'] + '</td>' + 
-	    '<td class="cart_total">' + item_total_string + '</td></tr>';
+	  if (wine_object['quantity'] > 0) {
+	    item_total = wine_object['price'] * wine_object['quantity'];
+	    cart_total += item_total;
+	    quantity_total += 1 * wine_object['quantity'];
+	    item_total_string = "$" + item_total;
+	    row_string = '<tr><td class="cart_name">' + wine_object['name'] + '</td>' +
+	      '<td class="cart_quantity">' + wine_object['quantity'] + '</td>' + 
+	      '<td class="cart_price">$' + wine_object['price'] + '</td>' + 
+	      '<td class="cart_total">' + item_total_string + '</td></tr>';
+	    cart_string += row_string;
+	  }
+	}
+	if (cart_total > 0) {
+	  var cart_total_string = '$' + cart_total;
+	  row_string = '<tr><td class="cart_name">' + 'Total' + '</td>' +
+	    '<td class="cart_quantity">' + quantity_total + '</td>' + 
+	    '<td class="cart_price">' + '</td>' + 
+	    '<td class="cart_total">' + cart_total_string + '</td></tr>';
+	  cart_string += row_string;
+	} else {
+	  row_string = '<tr><td class="cart_name">' + 'Cart is Empty' + '</td>' +
+	    '<td class="cart_quantity">' + '</td>' + 
+	    '<td class="cart_price">' + '</td>' + 
+	    '<td class="cart_total">' + '</td></tr>';
 	  cart_string += row_string;
 	}
 	cart_string += '</table>';
+	return cart_string;
+  };
+  get_cart = function() {
+	var cart_string = '<article class="cart_article">';
+	cart_string += '<header title="Toggle Cart Display">';
+	cart_string += '<h2>Your Shopping Cart</h2>';
+	cart_string += '<div class="close_icon" title="Hide Cart"></div>';
+	cart_string += '</header>';
+	cart_string += '<div class="table_div">';
+	cart_string += get_cart_table();
 	cart_string += '</div>';
 	cart_string += '</article>';
 	var cart_html = $.parseHTML(cart_string);
@@ -188,18 +225,35 @@ var wine_constructor = function() {
     	activate: function(event, ui) {
     		state_map.cart_article_table_is_collapsed = ! state_map.cart_article_table_is_collapsed;
     	},
+    	/*
     	beforeActivate: function(event, ui) {
-    		
     	},
+    	*/
       });
-    cart_article_header.click();
-    jquery_map[config_map.cart_article_key].hide();	
     cart_image_div.on('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
       if (! state_map.cart_article_is_displayed) {
         //jquery_map[config_map.cart_article_table_key].hide();	
-        jquery_map[config_map.cart_article_key].show();	
-        cart_article_header.click();
-        state_map.cart_article_is_displayed = true;
+        jquery_map[config_map.cart_article_key].show(function(){
+          var wait_ms = 0;
+          if (! state_map.cart_article_is_initialized) {
+        	wait_ms = 2000;
+            setTimeout(function(){
+              state_map.cart_article_is_initialized = true;
+              state_map.cart_table_is_collapsed = ! cart_article_table_div.hasClass('ui-accordion-content-active');
+              if (state_map.cart_table_is_collapsed) {
+                cart_article_header.click();
+              }
+            }, wait_ms);
+          } else {
+            state_map.cart_table_is_collapsed = ! cart_article_table_div.hasClass('ui-accordion-content-active');
+            if (state_map.cart_table_is_collapsed) {
+              cart_article_header.click();
+            }
+          }
+          state_map.cart_article_is_displayed = true;
+        });	
       }
     });
     cart_close_div.on('click', function(e){
@@ -217,6 +271,12 @@ var wine_constructor = function() {
         jquery_map[config_map.cart_article_key].hide("slow");	
       }
     });
+    cart_article_header.click();
+    //cart_article_table_div.hide();
+    jquery_map[config_map.cart_article_key].hide();	
+    setTimeout(function(){
+      state_map.cart_article_is_initialized = true;
+    }, 2000);
   };
   add_button_handler = function(wine_object) {
   	var wine_id = wine_object["id"];
@@ -313,7 +373,6 @@ var wine_constructor = function() {
 	  main_div.append(get_cart());
 	  append_jquery_map(config_map.cart_article_key, config_map.cart_article_selector);
 	  append_jquery_map(config_map.cart_article_table_key, config_map.cart_article_table_selector);
-	  add_cart_handlers();
 	  // create the article tag for each wine object add to the jquery container
 	  var index = "", wine_html;
 	  for (index in json_data) {
@@ -325,6 +384,7 @@ var wine_constructor = function() {
 	  // Store the image tags in the jquery map
 	  append_jquery_map(config_map.figure_image_key, config_map.figure_image_selector);
 	  on_resize();
+	  add_cart_handlers();
 	});
     $(window)
       .bind( 'resize', on_resize );
