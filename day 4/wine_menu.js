@@ -23,7 +23,11 @@ var wine_constructor = function() {
   	resize_key: '$header',
   	resize_selector: 'header',
   	cart_display_key: '$cart',
-  	cart_display_selector: '.cart_quantity',
+  	cart_display_selector: '.cart_total_quantity',
+  	cart_article_key: '$cart_article',
+  	cart_article_selector: '.cart_article',
+  	cart_article_table_key: '$cart_article_table',
+  	cart_article_table_selector: '.cart_article table',
   	figure_image_key: '$figure_images',
   	figure_image_selector: '.wine_figure img',
   	min_resize_px: 950,
@@ -39,6 +43,8 @@ var wine_constructor = function() {
 	wine_object: {},
   	wine_quantity: {},
   	resize_timer_id: null,
+  	cart_article_is_displayed: false,
+  	cart_article_table_is_collapsed: false,
   };
   jquery_map = {};
   /*
@@ -47,7 +53,8 @@ var wine_constructor = function() {
   var init_jquery_map, append_jquery_map, set_jquery_map, 
     init_wine_data, add_wine_quantity, set_wine_quantity,
     update_quantity_display, get_total_quantity, 
-    get_data, get_heading, get_cart, get_input_div, add_button_handler,
+    get_data, get_heading, get_cart, get_input_div, 
+    add_cart_handlers, add_button_handler,
     formatter, resize_display, on_resize, init_module
   init_jquery_map = function(container) {
 	  jquery_map[config_map.container_key] = $(container);
@@ -77,7 +84,6 @@ var wine_constructor = function() {
   		state_map.wine_object[id] = wine_object;
   		state_map.wine_quantity[id] = 0;
   	};
-  	console.log("wine_object.length = " + wine_object.length);
   };
   add_wine_quantity = function(id, quantity) {
   	if (id in wine.data.wine_quantity) {
@@ -104,6 +110,8 @@ var wine_constructor = function() {
   get_data = function(callback){
 	try {
   	  $.getJSON(config_map.ajax.get, function(data){
+  		// TEMPORARY WHILE Rails Server is being updated
+  		data = data.slice(0,8);
   	    init_wine_data(data);
   	    callback(data);
   	  });
@@ -118,14 +126,19 @@ var wine_constructor = function() {
   get_heading = function() {
 	var my_heading = '<header class=""><h1 class="">Wine Menu</h1>';
 	/* http://www.iconarchive.com/show/real-vista-business-icons-by-iconshock/shopping-cart-icon.html */
-	my_heading += '<a href="#"><div title="View Cart" class="cart_div"><figure alt="Shopping Cart"><img src="images/shopping-cart-icon.png">' +
+	my_heading += '<div title="View Cart" class="cart_div"><figure alt="Shopping Cart"><img src="images/shopping-cart-icon.png">' +
 	  '<div class="caption_div"><figurecaption>Cart</figurecaption>' + 
-	  '<span class="cart_total_quantity"></span></div></div></a></header>';
+	  '<span class="cart_total_quantity"></span></div></div></header>';
 	var my_heading_html = $.parseHTML(my_heading);
 	return my_heading_html;
   };
   get_cart = function() {
 	var cart_string = '<article class="cart_article">';
+	cart_string += '<header>';
+	cart_string += '<h2>Your Shopping Cart</h2>';
+	cart_string += '<div class="close_icon" title="hide cart"></div>';
+	cart_string += '</header>';
+	cart_string += '<div class="table_div">';
 	cart_string += '<table>';
 	cart_string += '<tr><th class="cart_name">Wine</th>' + 
 	  '<th class="cart_quantity">Number</th>' + 
@@ -147,6 +160,7 @@ var wine_constructor = function() {
 	  cart_string += row_string;
 	}
 	cart_string += '</table>';
+	cart_string += '</div>';
 	cart_string += '</article>';
 	var cart_html = $.parseHTML(cart_string);
 	return cart_html;
@@ -161,6 +175,48 @@ var wine_constructor = function() {
   	  '<button class="' + class_name + '">Add to Cart</button>' +
   	  '</div>';
   	return input_string;
+  };
+  add_cart_handlers = function() {
+    var cart_image_div = jquery_map[config_map.container_key].find('.cart_div');
+    var cart_close_div = jquery_map[config_map.container_key].find('.close_icon');
+    var cart_article_header = jquery_map[config_map.cart_article_key].find('header');
+    var cart_article_table_div = jquery_map[config_map.cart_article_key].find('.table_div');
+    jquery_map[config_map.cart_article_key].accordion(
+      { collapsible: true,     
+    	animate: { duration: 2000 },
+    	heightStyle: 'content',
+    	activate: function(event, ui) {
+    		state_map.cart_article_table_is_collapsed = ! state_map.cart_article_table_is_collapsed;
+    	},
+    	beforeActivate: function(event, ui) {
+    		
+    	},
+      });
+    cart_article_header.click();
+    jquery_map[config_map.cart_article_key].hide();	
+    cart_image_div.on('click', function(e){
+      if (! state_map.cart_article_is_displayed) {
+        //jquery_map[config_map.cart_article_table_key].hide();	
+        jquery_map[config_map.cart_article_key].show();	
+        cart_article_header.click();
+        state_map.cart_article_is_displayed = true;
+      }
+    });
+    cart_close_div.on('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      state_map.cart_table_is_collapsed = ! cart_article_table_div.hasClass('ui-accordion-content-active');
+      if (! state_map.cart_table_is_collapsed) {
+        cart_article_header.click();
+        setTimeout(function(){
+          jquery_map[config_map.cart_article_key].hide("medium");	
+          state_map.cart_article_is_displayed = false;
+        }, 2000);
+      } else {
+        state_map.cart_article_is_displayed = false;
+        jquery_map[config_map.cart_article_key].hide("slow");	
+      }
+    });
   };
   add_button_handler = function(wine_object) {
   	var wine_id = wine_object["id"];
@@ -255,6 +311,9 @@ var wine_constructor = function() {
 	// Call the ajax method to retrieve the wine data with anonymous callback function
 	get_data(function(json_data){
 	  main_div.append(get_cart());
+	  append_jquery_map(config_map.cart_article_key, config_map.cart_article_selector);
+	  append_jquery_map(config_map.cart_article_table_key, config_map.cart_article_table_selector);
+	  add_cart_handlers();
 	  // create the article tag for each wine object add to the jquery container
 	  var index = "", wine_html;
 	  for (index in json_data) {
