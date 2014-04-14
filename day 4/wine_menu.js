@@ -41,7 +41,6 @@ var wine_constructor = function() {
   };
   state_map = {
 	wine_object: {},
-  	wine_quantity: {},
   	resize_timer_id: null,
   	cart_article_is_displayed: false,
   	cart_article_table_is_collapsed: true,
@@ -52,7 +51,7 @@ var wine_constructor = function() {
    * VARIABLE DECLARATIONS FOR FUNCTIONS
    */
   var init_jquery_map, append_jquery_map, set_jquery_map, 
-    init_wine_data, add_wine_quantity, set_wine_quantity,
+    init_wine_data, set_wine_quantity,
     update_quantity_display, get_total_quantity, 
     get_data, get_heading, get_cart_table, get_cart, get_input_div, 
     add_cart_handlers, add_quantity_handlers, add_button_handler,
@@ -61,6 +60,10 @@ var wine_constructor = function() {
 	  jquery_map[config_map.container_key] = $(container);
   };
   append_jquery_map = function(key, child_selector) {
+	/*
+	 * Caches the element found in the main container for a given selector
+	 * into the jquery_map object.
+	 */
 	var value = jquery_map[config_map.container_key].find(child_selector);
 	if (value.size() > 0) {
 	  jquery_map[key] = value;
@@ -71,41 +74,46 @@ var wine_constructor = function() {
 	}
   };
   set_jquery_map = function() {
+	/*
+	 * Initializes the elements in the main header, which are independent of
+	 * loading of the wine_object JSON array.
+	 */
 	append_jquery_map(config_map.resize_key, config_map.resize_selector);
 	append_jquery_map(config_map.cart_display_key, config_map.cart_display_selector);
   };
   init_wine_data = function(object_array) {
+	/*
+	 * Adds the input array to the state_map.wine_object data structure.
+	 * Adds 2 new fields to each wine object:
+	 *   1.  initial quantity = 0
+	 *   2.  price is added from config_map.price_array
+	 */
 	var id, wine_object;
   	for (var index in object_array) {
-  		//state_map.wine_quantity[object_array[index]["name"]] = 0;
   		wine_object = object_array[index];
   		id = wine_object["id"];
   		wine_object['quantity'] = 0;
   		wine_object['price'] = config_map.price_array.shift();
   		state_map.wine_object[id] = wine_object;
-  		state_map.wine_quantity[id] = 0;
   	};
   };
-  add_wine_quantity = function(id, quantity) {
-	if (quantity < 0) {
-		return;
-	}
-  	if (id in wine.data.wine_quantity) {
-  		state_map.wine_quantity[id] += quantity;
-  	}
-  };
   set_wine_quantity = function(id, quantity) {
+	/*
+	 * If the quantity is > 0, the value is updated in the state_map.wine_object array
+	 */
 	if (quantity < 0) {
 		return;
 	}
-  	if (id in state_map.wine_quantity) {
-  		state_map.wine_quantity[id] = quantity;
-  	}
   	if (id in state_map.wine_object) {
   	  state_map.wine_object[id]['quantity'] = quantity;
   	}
   };
   update_quantity_display = function() {
+	/*
+	 * Update the number of total bottles of wine in the main header, and
+	 * replace the entire table in the cart article.  Must add new handlers
+	 * after the table is replaced.
+	 */
   	var total_quantity = get_total_quantity();
   	jquery_map[config_map.cart_display_key].html(total_quantity);
   	var cart_table_html = $.parseHTML(get_cart_table());
@@ -115,12 +123,19 @@ var wine_constructor = function() {
   get_total_quantity = function() {
   	var total_quantity = 0;
   	var wine_index = "";
-  	for (wine_index in state_map.wine_quantity) {
-  		total_quantity += parseInt(state_map.wine_quantity[wine_index]);
+  	var wine_quantity = 0;
+  	for (wine_index in state_map.wine_object) {
+  		wine_quantity = state_map.wine_object[wine_index]['quantity'];
+  		total_quantity += parseInt(wine_quantity);
   	}
   	return total_quantity;
   };  
   get_data = function(callback){
+	/*
+	 * Retrieves JSON array of wine objects and calls callback passing this data.
+	 * Uses try/catch to fallback on loading the JSON data from file if the
+	 * wine API server is down.
+	 */
 	try {
   	  $.getJSON(config_map.ajax.get, function(data){
   		// TEMPORARY WHILE Rails Server is being updated
@@ -137,6 +152,9 @@ var wine_constructor = function() {
 	}
   };
   get_heading = function() {
+	/*
+	 * Returns html header element.
+	 */
 	var my_heading = '<header class=""><h1 class="">Wine Menu</h1>';
 	/* http://www.iconarchive.com/show/real-vista-business-icons-by-iconshock/shopping-cart-icon.html */
 	my_heading += '<div title="View Cart" class="cart_div"><figure alt="Shopping Cart"><img src="images/shopping-cart-icon.png">' +
@@ -146,6 +164,12 @@ var wine_constructor = function() {
 	return my_heading_html;
   };
   add_quantity_handlers = function() {
+	/*
+	 * Add a "change" handler to each input element in the cart article table.
+	 * If value is changed, then the corresponding value is updated in the individual
+	 * wine article, and then it's "Add to Cart" button is clicked, which triggers an
+	 * update of the entire table.
+	 */
 	var input_elements = jquery_map[config_map.container_key].find('.cart_quantity input');
 	var row_element = null;
 	var wine_class = "";
@@ -168,17 +192,13 @@ var wine_constructor = function() {
 	  var wine_article_button = wine_article.find('button');
 	  wine_article_button.click();
 	});
-	/*
-	var wine_index = 0, id, input_selector, input_element;
-	for (wine_index in state_map.wine_object) {
-	  wine_object = state_map.wine_object[wine_index];
-	  id = wine_object["id"];
-	  input_selector = '.row_' + id + ' .cart_quantity input';
-
-	}
-	*/ 
   };
   get_cart_table = function() {
+	/*
+	 * Constructs and returns the html string for the cart article table.
+	 * The last row in the table is a summary of the total amount ordered, or
+	 * shows a message "Cart is Empty" if there are no entries.
+	 */
     var cart_string = "";
 	cart_string += '<table>';
 	cart_string += '<tr><th class="cart_name">Wine</th>' + 
@@ -201,12 +221,6 @@ var wine_constructor = function() {
 	    cart_total += item_total;
 	    quantity_total += 1 * wine_object['quantity'];
 	    item_total_string = "$" + item_total;
-	    /*
-	    row_string = '<tr><td class="cart_name">' + wine_object['name'] + '</td>' +
-	      '<td class="cart_quantity">' + wine_object['quantity'] + '</td>' + 
-	      '<td class="cart_price">$' + wine_object['price'] + '</td>' + 
-	      '<td class="cart_total">' + item_total_string + '</td></tr>';
-	    */
 	    row_string = '<tr class="wine_' + wine_id + '"><td class="cart_name">' + wine_object['name'] + '</td>' +
 	      '<td class="cart_quantity">' + 
 	      '<input type="number" value="' + wine_object['quantity'] + '"/></td>' + 
@@ -223,6 +237,7 @@ var wine_constructor = function() {
 	    '<td class="cart_total">' + cart_total_string + '</td></tr>';
 	  cart_string += row_string;
 	} else {
+	  /* If cart is empty, dipslay message in table */
 	  row_string = '<tr><td class="cart_name">' + 'Cart is Empty' + '</td>' +
 	    '<td class="cart_quantity">' + '</td>' + 
 	    '<td class="cart_price">' + '</td>' + 
@@ -233,6 +248,9 @@ var wine_constructor = function() {
 	return cart_string;
   };
   get_cart = function() {
+	/*
+	 * Return the HTML element for the cart article and table
+	 */
 	var cart_string = '<article class="cart_article">';
 	cart_string += '<header title="Toggle Cart Display">';
 	cart_string += '<h2>Your Shopping Cart</h2>';
@@ -246,6 +264,10 @@ var wine_constructor = function() {
 	return cart_html;
   },
   get_input_div = function(wine_object) {
+	/*
+	 * Return the HTML string for the input div section for a specified
+	 * wine_object
+	 */
   	var wine_id = wine_object["id"];
   	var class_name = 'input_' + wine_id;
   	var input_string = '<div class="input_div">' +
@@ -257,6 +279,16 @@ var wine_constructor = function() {
   	return input_string;
   };
   add_cart_handlers = function() {
+	/*
+	 * Add handlers for diplsaying the cart:
+	 * 1.  Add and jQuery UI accordion to the header section of the cart article
+	 * 2.  Add a click handler to the cart_div in the main header to first display
+	 *     the cart header, and then click the cart header to make the table below 
+	 *     display smoothly with the accordion widget
+	 * 3.  Add a click handler to the close_icon in the cart article header, which
+	 *     first clicks the cart header to close the accordian, and then hides
+	 *     the entire article
+	 */
     var cart_image_div = jquery_map[config_map.container_key].find('.cart_div');
     var cart_close_div = jquery_map[config_map.container_key].find('.close_icon');
     var cart_article_header = jquery_map[config_map.cart_article_key].find('header');
@@ -268,10 +300,6 @@ var wine_constructor = function() {
     	activate: function(event, ui) {
     		state_map.cart_article_table_is_collapsed = ! state_map.cart_article_table_is_collapsed;
     	},
-    	/*
-    	beforeActivate: function(event, ui) {
-    	},
-    	*/
       });
     cart_image_div.on('click', function(e){
       e.preventDefault();
@@ -315,23 +343,34 @@ var wine_constructor = function() {
       }
     });
     cart_article_header.click();
-    //cart_article_table_div.hide();
     jquery_map[config_map.cart_article_key].hide();	
     setTimeout(function(){
       state_map.cart_article_is_initialized = true;
     }, 2000);
   };
   add_button_handler = function(wine_object) {
+	/*
+	 * Add handler for "Add to Cart" button which updates the values
+	 * in the main header for total quantity, and row in the cart article table
+	 */
   	var wine_id = wine_object["id"];
   	var button_selector = 'button.input_' + wine_id;
   	var input_selector = 'input.input_' + wine_id;
   	$(button_selector).on('click', function(e) {
   		var quantity = $(input_selector).val();
+  		if (quantity < 0) {
+  		  quantity = 0;
+  		  console.log('Wine quantity must be > 0');
+  		}
   		set_wine_quantity(wine_id, quantity);
   		update_quantity_display();
   	});
   };
   formatter = {
+	/*
+	 * Object which contains methods to format each wine article, and to format
+	 * money.
+	 */	  
   	as_article: function(wine_object) {
   	  var key, value, class_name, img_src;
   	  var key_array = ["name", "year", "grapes", "country", "region", "description"];
@@ -358,6 +397,10 @@ var wine_constructor = function() {
   	  return article_html;
     },
     as_money: function(value, decimals, decimal_sep, thousands_sep) { 
+      /*
+       * Formats floating number to desired decimal places.  Useful for display money values
+       * after tax is calculated, but not currently used.
+       */
   	  /* http://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-money-in-javascript */
   	  var n = value,
   	  c = isNaN(decimals) ? 2 : Math.abs(decimals), //if decimal is zero we must take it, it means user does not want to show any decimal
@@ -380,13 +423,16 @@ var wine_constructor = function() {
   	},
   };
   resize_display = function() {
+	/*
+	 * Resizes the main font and wine image size for the current browser window
+	 * The minimum size for the main font is set in the config_map
+	 */
     var header_width = jquery_map[config_map.resize_key].width();
     console.log ('width = ' + header_width);
     if (header_width >= config_map.min_resize_px) {
     	return;
     }
     var scale = header_width / config_map.min_resize_px;
-    //var new_em = config_map.initial_article_em * scale;
     var new_font_px = config_map.initial_container_font_px * scale;
     new_font_px = Math.max(new_font_px, config_map.min_container_font_px);
     new_font_px += "px";
@@ -397,6 +443,10 @@ var wine_constructor = function() {
     
   };
   on_resize = function (){
+	/*
+	 * Throttles the call to resize the method as the browser window size is adjusted.
+	 * The minimum time before the resize method is called is config_map.resize_interval
+	 */
     if (state_map.timer_id != null) {
     	return true;
     }
@@ -407,6 +457,11 @@ var wine_constructor = function() {
     return true;
   };
   init_module = function(container) {
+	/*
+	 * Constructs and appends the HTML elements for the application into the specified
+	 * HTML container selector. Adds event handlers for buttons, input elements, and
+	 * window resizing.
+	 */
     init_jquery_map(container);
     var main_div = jquery_map['$container'];
     main_div.append(get_heading());
@@ -435,12 +490,21 @@ var wine_constructor = function() {
       .bind( 'resize', on_resize );
   };
 
+  /*
+   * The init_module function is the only thing returned by the construtor.
+   */
   return {
 	init_module: init_module,
   };
 };
 
+/* End of wine_constructor */
+/*----------------------------------------------------------------------------*/
+
 $(document).ready(function(){
+	/*
+	 * After the document is loaded, construct a new new_app and then initialize it.
+	 */
 	var wine_app = new wine_constructor();
 	wine_app.init_module('.wine_menu_main');
 });
