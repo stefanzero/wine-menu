@@ -100,9 +100,12 @@
 .wine_menu_main article.cart_article .cart_quantity { 
   width: 12%;
 }
+.wine_menu_main article.cart_article .cart_quantity input { 
+  width: 90%;
+}
 .wine_menu_main article.cart_article td.cart_quantity { 
-  padding-left: 5%;
-  padding-right: 1%;
+  padding-left: .5%;
+  padding-right: 2%;
 }
 .wine_menu_main article.cart_article .cart_price { 
   width: 12%;
@@ -225,6 +228,9 @@
   }
   .wine_menu_main article.cart_article table {
     margin-left: 20px;
+  }
+  .wine_menu_main article.cart_article .cart_quantity input { 
+    width: 90%;
   }
   .wine_menu_main article.cart_article .close_icon { 
     height: 18px;

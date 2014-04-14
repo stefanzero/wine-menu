@@ -55,7 +55,7 @@ var wine_constructor = function() {
     init_wine_data, add_wine_quantity, set_wine_quantity,
     update_quantity_display, get_total_quantity, 
     get_data, get_heading, get_cart_table, get_cart, get_input_div, 
-    add_cart_handlers, add_button_handler,
+    add_cart_handlers, add_quantity_handlers, add_button_handler,
     formatter, resize_display, on_resize, init_module
   init_jquery_map = function(container) {
 	  jquery_map[config_map.container_key] = $(container);
@@ -110,6 +110,7 @@ var wine_constructor = function() {
   	jquery_map[config_map.cart_display_key].html(total_quantity);
   	var cart_table_html = $.parseHTML(get_cart_table());
   	jquery_map[config_map.cart_article_key].find('table').replaceWith(cart_table_html);
+  	add_quantity_handlers();
   };
   get_total_quantity = function() {
   	var total_quantity = 0;
@@ -144,6 +145,39 @@ var wine_constructor = function() {
 	var my_heading_html = $.parseHTML(my_heading);
 	return my_heading_html;
   };
+  add_quantity_handlers = function() {
+	var input_elements = jquery_map[config_map.container_key].find('.cart_quantity input');
+	var row_element = null;
+	var wine_class = "";
+	var target_element = null;
+	input_elements.change(function(e) {
+	  e.preventDefault();
+	  e.stopPropagation();
+	  var this_elem = $(this);
+	  var value = this_elem.val();
+	  if (value < 0) {
+	    console.log('Wine quantity must be > 0');
+	    this_elem.val(0);
+	  } else {
+	    row_element = this_elem.parentsUntil('table', 'tr'); 
+	    var wine_selector = '.' + row_element.attr('class');
+	    var wine_article = jquery_map[config_map.container_key].find(wine_selector);
+	    var wine_article_input = wine_article.find('input');
+	    wine_article_input.val(value);
+	    var wine_article_button = wine_article.find('button');
+	    wine_article_button.click();
+	  }
+	});
+	/*
+	var wine_index = 0, id, input_selector, input_element;
+	for (wine_index in state_map.wine_object) {
+	  wine_object = state_map.wine_object[wine_index];
+	  id = wine_object["id"];
+	  input_selector = '.row_' + id + ' .cart_quantity input';
+
+	}
+	*/ 
+  };
   get_cart_table = function() {
     var cart_string = "";
 	cart_string += '<table>';
@@ -152,6 +186,7 @@ var wine_constructor = function() {
 	  '<th class="cart_price">Price</th>' + 
 	  '<th class="cart_total">Total</th></tr>';
 	var wine_index = "";
+	var wine_id = 0;
 	var wine_object = null;
 	var item_total = 0;
 	var cart_total = 0;
@@ -161,12 +196,20 @@ var wine_constructor = function() {
 	for (wine_index in state_map.wine_object) {
 	  wine_object = state_map.wine_object[wine_index];
 	  if (wine_object['quantity'] > 0) {
+		wine_id = wine_object['id'];
 	    item_total = wine_object['price'] * wine_object['quantity'];
 	    cart_total += item_total;
 	    quantity_total += 1 * wine_object['quantity'];
 	    item_total_string = "$" + item_total;
+	    /*
 	    row_string = '<tr><td class="cart_name">' + wine_object['name'] + '</td>' +
 	      '<td class="cart_quantity">' + wine_object['quantity'] + '</td>' + 
+	      '<td class="cart_price">$' + wine_object['price'] + '</td>' + 
+	      '<td class="cart_total">' + item_total_string + '</td></tr>';
+	    */
+	    row_string = '<tr class="wine_' + wine_id + '"><td class="cart_name">' + wine_object['name'] + '</td>' +
+	      '<td class="cart_quantity">' + 
+	      '<input type="number" value="' + wine_object['quantity'] + '"/></td>' + 
 	      '<td class="cart_price">$' + wine_object['price'] + '</td>' + 
 	      '<td class="cart_total">' + item_total_string + '</td></tr>';
 	    cart_string += row_string;
@@ -292,8 +335,9 @@ var wine_constructor = function() {
   	as_article: function(wine_object) {
   	  var key, value, class_name, img_src;
   	  var key_array = ["name", "year", "grapes", "country", "region", "description"];
+  	  var wine_id = 'wine_' + wine_object['id'];
   	  var article_string = "<article>";
-  	  article_string += '<div class="row wine_object_div">';
+  	  article_string += '<div class="row wine_object_div ' + wine_id + '">';
   	  article_string += '<div class="wine_info">';
   	  for (var i in key_array) {
   	  	key = key_array[i];
@@ -385,6 +429,7 @@ var wine_constructor = function() {
 	  append_jquery_map(config_map.figure_image_key, config_map.figure_image_selector);
 	  on_resize();
 	  add_cart_handlers();
+	  add_quantity_handlers();
 	});
     $(window)
       .bind( 'resize', on_resize );
