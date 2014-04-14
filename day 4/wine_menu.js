@@ -157,16 +157,16 @@ var wine_constructor = function() {
 	  var value = this_elem.val();
 	  if (value < 0) {
 	    console.log('Wine quantity must be > 0');
+	    value = 0;
 	    this_elem.val(0);
-	  } else {
-	    row_element = this_elem.parentsUntil('table', 'tr'); 
-	    var wine_selector = '.' + row_element.attr('class');
-	    var wine_article = jquery_map[config_map.container_key].find(wine_selector);
-	    var wine_article_input = wine_article.find('input');
-	    wine_article_input.val(value);
-	    var wine_article_button = wine_article.find('button');
-	    wine_article_button.click();
-	  }
+	  } 
+	  row_element = this_elem.parentsUntil('table', 'tr'); 
+	  var wine_selector = '.' + row_element.attr('class');
+	  var wine_article = jquery_map[config_map.container_key].find(wine_selector);
+	  var wine_article_input = wine_article.find('input');
+	  wine_article_input.val(value);
+	  var wine_article_button = wine_article.find('button');
+	  wine_article_button.click();
 	});
 	/*
 	var wine_index = 0, id, input_selector, input_element;
